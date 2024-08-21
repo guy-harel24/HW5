@@ -143,15 +143,15 @@ if __name__ == "__main__":
     if '-o' in args_dict:
         try:
             with open(args_dict['-o'], 'w') as output:
-                with open(args_dict['-i'], 'r') as input:
-                    for line in input:
+                with open(args_dict['-i'], 'r') as fileInput:
+                    for line in fileInput:
                         output.write(enigma.encrypt(line))
         except Exception:
             raise InvalidArgs
     else:
         try:
-            with open(args_dict['-i'], 'r') as input:
-                for line in input:
+            with open(args_dict['-i'], 'r') as fileInput:
+                for line in fileInput:
                     print(enigma.encrypt(line), end = '')
         except Exception:
             raise InvalidArgs

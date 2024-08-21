@@ -64,8 +64,14 @@ class Enigma:
         result = (c3, 1)
         return result
 
-def rotate_wheels():
-    pass
+def rotate_wheels(count, tmp_wheels):
+    tmp_wheels[0] = 1 if tmp_wheels[0] > 8 else tmp_wheels[0] + 1
+    tmp_wheels[1] *= 2 if tmp_wheels[1] % 2 == 1 else tmp_wheels[1] - 1
+    if tmp_wheels[2] % 10 == 0:
+        tmp_wheels[2] = 10
+    elif tmp_wheels[2] % 3 == 0:
+        tmp_wheels[2] = 5
+    else: tmp_wheels[2] = 0
 
 def load_enigma_from_path(path):
     pass

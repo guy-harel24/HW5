@@ -52,6 +52,7 @@ class Enigma:
                 c3 = key
                 break
 
+        # Encryption finished
         result = (c3, 1)
         return result
 

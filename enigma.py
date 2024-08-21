@@ -105,24 +105,53 @@ def rotate_wheels(count, tmp_wheels):
         tmp_wheels[W3_IDX] = 5
     else: tmp_wheels[W3_IDX] = 0
 
-if __name__ == "__main__":
-    if len(sys.argv) not in (5, 7):
-        raise InvalidArgs
+def bad_params_err():
+    sys.stderr.write("Usage: python3 enigma.py -c <config_file> -i<input_file>"
+                     "-o <output_file>")
+    exit(1)
 
-    enigma = load_enigma_from_path(sys.argv[2])
+def input_validation(input_list):
+    # Validates that the amount of arguments received is legal
+    if len(input_list) not in (5, 7):
+        bad_params_err()
 
-    if len(sys.argv) == 5:
+    # Matches flag to path. Checks whether paths are missing and validates flags
+    necessary_flags = ['-c', '-i']
+    valid_flags = necessary_flags + ['-o']
+    args_dict = {}
+
+    for i in range(1,len(input_list), 2):
         try:
-            with open(sys.argv[4], 'r') as input:
-                for line in input:
-                    print(enigma.encrypt(line), end = '')
+            if input_list[i] in valid_flags:
+                args_dict[input_list[i]] = input_list[i+1]
+            else:
+                bad_params_err()
+        except Exception:
+            bad_params_err()
+
+    # Checks if necessary flags are missing
+    for flag in necessary_flags:
+        if flag not in args_dict:
+            bad_params_err()
+    return args_dict
+
+
+if __name__ == "__main__":
+    args_dict = input_validation(sys.argv)
+
+    enigma = load_enigma_from_path(args_dict['-c'])
+    if '-o' in args_dict:
+        try:
+            with open(args_dict['-o'], 'w') as output:
+                with open(args_dict['-i'], 'r') as input:
+                    for line in input:
+                        output.write(enigma.encrypt(line))
         except Exception:
             raise InvalidArgs
     else:
         try:
-            with open(sys.argv[6], 'w') as output:
-                with open(sys.argv[4], 'r') as input:
-                    for line in input:
-                        output.write(enigma.encrypt(line))
+            with open(args_dict['-i'], 'r') as input:
+                for line in input:
+                    print(enigma.encrypt(line), end = '')
         except Exception:
             raise InvalidArgs

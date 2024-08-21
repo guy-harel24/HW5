@@ -22,7 +22,7 @@ def load_enigma_from_path(path):
         with open(path, 'r') as file:
             maps = json.load(file)
     except Exception:
-        raise JSONFileError(path)
+        raise JSONFileError()
 
     hash_map = maps['hash_map']
     wheels = maps['wheels']
@@ -106,8 +106,12 @@ def rotate_wheels(count, tmp_wheels):
     else: tmp_wheels[W3_IDX] = 0
 
 def bad_params_err():
-    sys.stderr.write("Usage: python3 enigma.py -c <config_file> -i<input_file>"
-                     "-o <output_file>")
+    sys.stderr.write("Usage: python3 enigma.py -c <config_file> -i <input_file>"
+                     " -o <output_file>\n")
+    exit(1)
+
+def runtime_scrypt_err():
+    sys.stderr.write("The enigma script has encountered an error\n")
     exit(1)
 
 def input_validation(input_list):
@@ -139,19 +143,16 @@ def input_validation(input_list):
 if __name__ == "__main__":
     args_dict = input_validation(sys.argv)
 
-    enigma = load_enigma_from_path(args_dict['-c'])
-    if '-o' in args_dict:
-        try:
+    try:
+        enigma = load_enigma_from_path(args_dict['-c'])
+        if '-o' in args_dict:
             with open(args_dict['-o'], 'w') as output:
                 with open(args_dict['-i'], 'r') as fileInput:
                     for line in fileInput:
                         output.write(enigma.encrypt(line))
-        except Exception:
-            raise InvalidArgs
-    else:
-        try:
+        else:
             with open(args_dict['-i'], 'r') as fileInput:
                 for line in fileInput:
                     print(enigma.encrypt(line), end = '')
-        except Exception:
-            raise InvalidArgs
+    except Exception:
+        runtime_scrypt_err()

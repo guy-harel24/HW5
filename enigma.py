@@ -1,9 +1,33 @@
 import copy
 import json
+import sys
 
 W1_IDX = 0
 W2_IDX = 1
 W3_IDX = 2
+
+
+class JSONFileError(Exception):
+    def __init__(self, message="The enigma script has encountered an error"):
+        self.message = message
+        super().__init__(self.message)
+
+class InvalidArgs(Exception):
+    def __init__(self, message="The enigma script has encountered an error"):
+        self.message = message
+        super().__init__(self.message)
+
+def load_enigma_from_path(path):
+    try:
+        with open(path, 'r') as file:
+            maps = json.load(file)
+    except Exception:
+        raise JSONFileError(path)
+
+    hash_map = maps['hash_map']
+    wheels = maps['wheels']
+    reflector_map = maps['reflector_map']
+    return Enigma(hash_map, wheels, reflector_map)
 
 class Enigma:
     def __init__(self, hash_map, wheels, reflector_map):
@@ -81,21 +105,24 @@ def rotate_wheels(count, tmp_wheels):
         tmp_wheels[W3_IDX] = 5
     else: tmp_wheels[W3_IDX] = 0
 
+if __name__ == "__main__":
+    if len(sys.argv) not in (5, 7):
+        raise InvalidArgs
 
-class JSONFileError(Exception):
-    def __init__(self, message="JSONFileError occurred"):
-        self.message = message
-        super().__init__(self.message)
+    enigma = load_enigma_from_path(sys.argv[2])
 
-
-def load_enigma_from_path(path):
-    try:
-        with open(path, 'r') as file:
-            maps = json.load(file)
-    except Exception:
-        raise JSONFileError(path)
-
-    hash_map = maps['hash_map']
-    wheels = maps['wheels']
-    reflector_map = maps['reflector_map']
-    return Enigma(hash_map, wheels, reflector_map)
+    if len(sys.argv) == 5:
+        try:
+            with open(sys.argv[4], 'r') as input:
+                for line in input:
+                    print(enigma.encrypt(line), end = '')
+        except Exception:
+            raise InvalidArgs
+    else:
+        try:
+            with open(sys.argv[6], 'w') as output:
+                with open(sys.argv[4], 'r') as input:
+                    for line in input:
+                        output.write(enigma.encrypt(line))
+        except Exception:
+            raise InvalidArgs

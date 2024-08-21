@@ -6,7 +6,15 @@ class Enigma:
         self.reflector_map = reflector_map
 
     def encrypt(self, message):
-        pass
+        tmp_wheels = copy.deepcopy(self.wheels)
+        encrypted_list = []
+        count = 0
+        for char in message:
+            encrypted_char, add_to_count = self.encrypt_char(char, tmp_wheels)
+            encrypted_list.append(encrypted_char)
+            count += add_to_count
+            self.rotate_wheels(count, tmp_wheels)
+        return ''.join(encrypted_list)
 
 
     def encrypt_char(self, char, tmp_wheels):
@@ -56,6 +64,8 @@ class Enigma:
         result = (c3, 1)
         return result
 
+def rotate_wheels():
+    pass
 
 def load_enigma_from_path(path):
     pass

@@ -2,20 +2,23 @@ import copy
 import json
 import sys
 
+# Encryption parameters
 W1_IDX = 0
 W2_IDX = 1
 W3_IDX = 2
+W1_MULT = 2
+DEFINED_MOD = 26
 
+# Run command parameters
+FLAG_STEP_SIZE = 2
+FLAG_STARTING_IDX = 1
+POSSIBLE_ARGS_AMOUNT = (5, 7)
 
 class JSONFileError(Exception):
-    def __init__(self, message="The enigma script has encountered an error"):
+    def __init__(self, message="JSON file is not valid"):
         self.message = message
-        super().__init__(self.message)
+        Exception.__init__(self, message)
 
-class InvalidArgs(Exception):
-    def __init__(self, message="The enigma script has encountered an error"):
-        self.message = message
-        super().__init__(self.message)
 
 def load_enigma_from_path(path):
     try:
@@ -48,10 +51,6 @@ class Enigma:
 
 
     def encrypt_char(self, char, tmp_wheels):
-        # Local variables
-        W1_MULT = 2
-        DEFINED_MOD = 26
-
         # Check if encryption is not needed
         if char.islower() is False:
             result = (char, 0)
@@ -110,13 +109,22 @@ def bad_params_err():
                      " -o <output_file>\n")
     exit(1)
 
-def runtime_scrypt_err():
+def runtime_script_err():
     sys.stderr.write("The enigma script has encountered an error\n")
     exit(1)
 
 def input_validation(input_list):
+    """
+    Validates the Run command given when module is activated through script, due
+    to the following conditions:
+    1. Legitimacy of arguments amount in the command.
+    2. Run command holds necessary flags.
+    :param input_list: run command values set in order in a list
+    :return args_dict: dictionary holding matching flags and arguments
+    """
+
     # Validates that the amount of arguments received is legal
-    if len(input_list) not in (5, 7):
+    if len(input_list) not in POSSIBLE_ARGS_AMOUNT:
         bad_params_err()
 
     # Matches flag to path. Checks whether paths are missing and validates flags
@@ -124,7 +132,7 @@ def input_validation(input_list):
     valid_flags = necessary_flags + ['-o']
     args_dict = {}
 
-    for i in range(1,len(input_list), 2):
+    for i in range(FLAG_STARTING_IDX,len(input_list), FLAG_STEP_SIZE):
         try:
             if input_list[i] in valid_flags:
                 args_dict[input_list[i]] = input_list[i+1]
@@ -155,4 +163,4 @@ if __name__ == "__main__":
                 for line in fileInput:
                     print(enigma.encrypt(line), end = '')
     except Exception:
-        runtime_scrypt_err()
+        runtime_script_err()

@@ -8,14 +8,17 @@ W2_IDX = 1
 W3_IDX = 2
 W1_MULT = 2
 DEFINED_MOD = 26
+ENCRYPTED = 1
+NOT_ENCRYPTED = 0
 
 # Run command parameters
 FLAG_STEP_SIZE = 2
 FLAG_STARTING_IDX = 1
 POSSIBLE_ARGS_AMOUNT = (5, 7)
 
+
 class JSONFileError(Exception):
-    def __init__(self, message="JSON file is not valid"):
+    def __init__(self, message = "JSON file is not valid"):
         self.message = message
         Exception.__init__(self, message)
 
@@ -31,6 +34,7 @@ def load_enigma_from_path(path):
     wheels = maps['wheels']
     reflector_map = maps['reflector_map']
     return Enigma(hash_map, wheels, reflector_map)
+
 
 class Enigma:
     def __init__(self, hash_map, wheels, reflector_map):
@@ -49,11 +53,10 @@ class Enigma:
             rotate_wheels(count, tmp_wheels)
         return ''.join(encrypted_list)
 
-
     def encrypt_char(self, char, tmp_wheels):
         # Check if encryption is not needed
         if char.islower() is False:
-            result = (char, 0)
+            result = (char, NOT_ENCRYPTED)
             return result
 
         # Encryption is needed. start the process
@@ -90,8 +93,9 @@ class Enigma:
                 break
 
         # Encryption finished
-        result = (c3, 1)
+        result = (c3, ENCRYPTED)
         return result
+
 
 def rotate_wheels(count, tmp_wheels):
     tmp_wheels[W1_IDX] = 1 if tmp_wheels[W1_IDX] == 8\
@@ -102,16 +106,20 @@ def rotate_wheels(count, tmp_wheels):
         tmp_wheels[W3_IDX] = 10
     elif count % 3 == 0:
         tmp_wheels[W3_IDX] = 5
-    else: tmp_wheels[W3_IDX] = 0
+    else:
+        tmp_wheels[W3_IDX] = 0
+
 
 def bad_params_err():
     sys.stderr.write("Usage: python3 enigma.py -c <config_file> -i <input_file>"
                      " -o <output_file>\n")
     exit(1)
 
+
 def runtime_script_err():
     sys.stderr.write("The enigma script has encountered an error\n")
     exit(1)
+
 
 def input_validation(input_list):
     """
@@ -130,12 +138,12 @@ def input_validation(input_list):
     # Matches flag to path. Checks whether paths are missing and validates flags
     necessary_flags = ['-c', '-i']
     valid_flags = necessary_flags + ['-o']
-    args_dict = {}
+    args_dict = { }
 
-    for i in range(FLAG_STARTING_IDX,len(input_list), FLAG_STEP_SIZE):
+    for i in range(FLAG_STARTING_IDX, len(input_list), FLAG_STEP_SIZE):
         try:
             if input_list[i] in valid_flags:
-                args_dict[input_list[i]] = input_list[i+1]
+                args_dict[input_list[i]] = input_list[i + 1]
             else:
                 bad_params_err()
         except Exception:
